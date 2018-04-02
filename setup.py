@@ -56,9 +56,6 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
             build_args += ['--', '-j2']
         
-        print(cmake_args)
-        print(build_args)
-
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
             env.get('CXXFLAGS', ''),
@@ -71,14 +68,20 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp)
         print()
 
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as r_file:
+    readme = r_file.read()
+
 setup(
     name='s2-py',
-    version='0.0.1',
+    version='0.0.2',
     description='pip-able S2 Geometry Bindings',
-    long_description='',
+    long_description=readme,
+    long_description_content_type='text/markdown',
+    author='Gabe Frangakis',
+    license='Apache',
     packages=['s2_py'],
     # add extension module
-    ext_modules=[CMakeExtension('s2geometry', sourcedir='s2geometry')],
+    ext_modules=[CMakeExtension('s2_py')],
     # add custom build_ext command
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,

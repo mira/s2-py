@@ -1,0 +1,6 @@
+include README.md LICENSE
+global-include CMakeLists.txt *.cmake
+recursive-include s2_py *
+recursive-include s2geometry/src *
+recursive-include s2geometry/doc *
+
