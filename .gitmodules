@@ -1,0 +1,3 @@
+[submodule "s2geometry"]
+	path = s2geometry
+	url = https://github.com/google/s2geometry
