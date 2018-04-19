@@ -6,7 +6,7 @@ import platform
 import subprocess
 
 from distutils.version import LooseVersion
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
 
@@ -36,7 +36,10 @@ class CMakeBuild(build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(
-            os.path.dirname(self.get_ext_fullpath(ext.name)))
+            os.path.join(
+                os.path.dirname(self.get_ext_fullpath(ext.name)),
+                ext.name
+        ))
         
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DCMAKE_SWIG_OUTDIR=' + extdir,
@@ -73,16 +76,15 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as r_file:
 
 setup(
     name='s2-py',
-    version='0.0.2',
+    version='0.0.4',
     description='pip-able S2 Geometry Bindings',
     long_description=readme,
-    long_description_content_type='text/markdown',
     author='Gabe Frangakis',
     license='Apache',
-    packages=['s2_py'],
+    packages=find_packages('lib'),
+    package_dir={'': 'lib'},
     # add extension module
     ext_modules=[CMakeExtension('s2_py')],
     # add custom build_ext command
     cmdclass=dict(build_ext=CMakeBuild),
-    zip_safe=False,
 )
