@@ -29,5 +29,9 @@ console:
 import:
 	$(VENV) && python -c "import s2_py as s2; print(s2)"
 
+cmake-build:
+	mkdir -p build
+	$(VENV) && cd build && cmake .. && make
+
 clean:
 	rm -rf build dist **/s2_py.egg-info venv *.so pywraps2.py *.cxx
