@@ -33,5 +33,8 @@ cmake-build:
 	mkdir -p build
 	$(VENV) && cd build && cmake .. && make
 
+upload: sdist
+	$(VENV) && pip install twine && twine upload dist/*
+
 clean:
 	rm -rf build dist **/s2_py.egg-info venv *.so pywraps2.py *.cxx
