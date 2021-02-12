@@ -76,7 +76,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as r_file:
 
 setup(
     name='s2-py',
-    version='0.9.0',
+    version='0.10.0',
     description='pip-able S2 Geometry Bindings',
     long_description=readme,
     author='Gabe Frangakis',
