@@ -82,6 +82,8 @@ setup(
     author='Gabe Frangakis',
     license='Apache',
     packages=find_packages('lib'),
+    # won't build if zip_safe
+    zip_safe=False,
     package_dir={'': 'lib'},
     # add extension module
     ext_modules=[CMakeExtension('s2_py')],
