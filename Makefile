@@ -5,31 +5,31 @@ VENV ?= source venv/bin/activate
 venv:
 	virtualenv -p python3.7 venv
 
-install:
+install: venv
 	$(VENV) && python setup.py install
 
-uninstall:
+uninstall: venv
 	$(VENV) && pip uninstall s2-py
 
-wheel:
+wheel: venv
 	$(VENV) && python setup.py bdist_wheel
 
 wheel-install: wheel
 	$(VENV) && pip install dist/*.whl
 
-sdist:
+sdist: venv
 	$(VENV) && python setup.py sdist
 
 sdist-install: sdist
 	$(VENV) && pip install dist/*.tar.gz -v
 
-console:
+console: venv
 	$(VENV) && python
 
-import:
+import: venv
 	$(VENV) && python -c "import s2_py as s2; print(s2)"
 
-cmake-build:
+cmake-build: venv
 	mkdir -p build
 	$(VENV) && cd build && cmake .. && make
 
