@@ -43,6 +43,9 @@ class CMakeBuild(build_ext):
         
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DCMAKE_SWIG_OUTDIR=' + extdir,
+                      '-DPython3_EXECUTABLE:FILEPATH=' + sys.executable,
+
+                      # TODO: Still need this?
                       '-DPYTHON_EXECUTABLE=' + sys.executable]
 
         cfg = 'Debug' if self.debug else 'Release'
@@ -76,7 +79,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as r_file:
 
 setup(
     name='s2-py',
-    version='0.10.0',
+    version='0.11.0',
     description='pip-able S2 Geometry Bindings',
     long_description=readme,
     author='Gabe Frangakis',
