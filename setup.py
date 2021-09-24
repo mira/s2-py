@@ -43,6 +43,7 @@ class CMakeBuild(build_ext):
         
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DCMAKE_SWIG_OUTDIR=' + extdir,
+                      '-DWITH_PYTHON=ON',
                       '-DPython3_EXECUTABLE:FILEPATH=' + sys.executable,
 
                       # TODO: Still need this?
