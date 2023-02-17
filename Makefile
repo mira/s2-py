@@ -3,7 +3,7 @@ SHELL := /bin/bash
 VENV ?= source venv/bin/activate
 
 venv:
-	virtualenv -p python3.7 venv
+	virtualenv -p python3.8 venv
 
 install: venv
 	$(VENV) && python setup.py install
