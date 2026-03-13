@@ -6,20 +6,16 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Static libs must be PIC to link into a shared .so (required on aarch64)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# On Linux (manylinux), only Development.Module is available — no libpython.so.
-# On macOS, the full Development (Module + Embed) is available and needed for linking.
-if(APPLE)
-  find_package(Python3 COMPONENTS Interpreter Development)
-else()
-  find_package(Python3 COMPONENTS Interpreter Development.Module)
-  # Satisfy the submodule's find_package(Python3 ... Development) requirement
-  set(Python3_FOUND TRUE)
-  set(Python3_Development_FOUND TRUE)
-  set(Python3_Development.Embed_FOUND TRUE)
-  # On Linux, SWIG modules don't link libpython — symbols resolve at runtime
-  if(NOT Python3_LIBRARIES)
-    set(Python3_LIBRARIES "")
-  endif()
+# Extension modules should use Development.Module (not Development/Embed)
+# to avoid linking libpython — symbols resolve at runtime via the interpreter.
+find_package(Python3 COMPONENTS Interpreter Development.Module)
+# Satisfy the submodule's find_package(Python3 ... Development) requirement
+set(Python3_FOUND TRUE)
+set(Python3_Development_FOUND TRUE)
+set(Python3_Development.Embed_FOUND TRUE)
+# Don't link libpython — not needed for extension modules
+if(NOT Python3_LIBRARIES)
+  set(Python3_LIBRARIES "")
 endif()
 
 # Prevent the s2geometry submodule from re-running find_package(Python3)

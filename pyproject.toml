@@ -20,25 +20,45 @@ wheel.packages = ["lib/s2_py"]
 cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}"
 install.components = ["s2_py"]
+cmake.args = ["-DCMAKE_CXX_FLAGS=-w", "-DOPENSSL_USE_STATIC_LIBS=TRUE"]
 
 [tool.cibuildwheel]
-build = "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
+# build = "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
+build = "cp313-*"
 
 [tool.cibuildwheel.linux]
-archs = "x86_64 aarch64"
+# archs = "x86_64 aarch64"
+archs = "x86_64"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_*"
 before-all = [
     "yum install -y pcre-devel openssl-devel",
     "rm -f /usr/local/bin/swig*",
     "curl -L https://github.com/swig/swig/archive/refs/tags/v3.0.12.tar.gz | tar xz",
-    "cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(nproc) && make install",
+    "(cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(nproc) && make install)",
     "curl -L https://github.com/google/googletest/archive/refs/tags/release-1.8.1.tar.gz | tar xz",
-    "cd googletest-release-1.8.1/googletest && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS='-Wno-error=maybe-uninitialized' && make -j$(nproc) && cp -r ../include/gtest /usr/local/include/gtest",
+    "(cd googletest-release-1.8.1/googletest && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS='-Wno-error=maybe-uninitialized' && make -j$(nproc) && cp -r ../include/gtest /usr/include/gtest)",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "*-musllinux_*"
+before-all = [
+    "apk add --no-cache pcre-dev openssl-dev cmake make gcc g++ autoconf automake libtool",
+    "rm -f /usr/local/bin/swig*",
+    "curl -L https://github.com/swig/swig/archive/refs/tags/v3.0.12.tar.gz | tar xz",
+    "(cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(nproc) && make install)",
+    "curl -L https://github.com/google/googletest/archive/refs/tags/release-1.8.1.tar.gz | tar xz",
+    "(cd googletest-release-1.8.1/googletest && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS='-Wno-error=maybe-uninitialized' && make -j$(nproc) && cp -r ../include/gtest /usr/include/gtest)",
 ]
 
 [tool.cibuildwheel.macos]
-archs = "x86_64 arm64"
+archs = "auto"
+environment = { MACOSX_DEPLOYMENT_TARGET = "14.0" }
 before-all = [
-    "brew install pcre cmake automake googletest",
+    "brew install pcre cmake automake openssl@3",
     "curl -L https://github.com/swig/swig/archive/refs/tags/v3.0.12.tar.gz | tar xz",
-    "cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(sysctl -n hw.ncpu) && make install",
+    "(cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(sysctl -n hw.ncpu) && sudo make install)",
+    "curl -L https://github.com/google/googletest/archive/refs/tags/release-1.8.1.tar.gz | tar xz",
+    "(cd googletest-release-1.8.1/googletest && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && make -j$(sysctl -n hw.ncpu) && sudo mkdir -p /usr/local/include && sudo cp -r ../include/gtest /usr/local/include/gtest)",
 ]
