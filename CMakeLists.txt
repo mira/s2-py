@@ -1,15 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(s2_py)
 
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
+# Link s2 statically into _pywraps2.so so the wheel is self-contained
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(s2geometry)
-if (APPLE) 
-   set(CMAKE_MACOSX_RPATH TRUE)
-   set_target_properties(_pywraps2 PROPERTIES INSTALL_RPATH "@loader_path/")
 
-else()
-   set_target_properties(_pywraps2 PROPERTIES INSTALL_RPATH "$ORIGIN/")
-endif()
+# Install the SWIG extension and Python wrapper into the s2_py package
+install(TARGETS _pywraps2 DESTINATION s2_py COMPONENT s2_py)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/s2geometry/python/pywraps2.py" DESTINATION s2_py COMPONENT s2_py)

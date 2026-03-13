@@ -1,0 +1,22 @@
+[build-system]
+requires = ["scikit-build-core>=0.5"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "s2-py"
+version = "0.11.1"
+description = "pip-able S2 Geometry Bindings"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [{ name = "Gabe Frangakis" }]
+requires-python = ">=3.8"
+dependencies = []
+
+[dependency-groups]
+dev = ["build", "twine"]
+
+[tool.scikit-build]
+wheel.packages = ["lib/s2_py"]
+cmake.build-type = "Release"
+build-dir = "build/{wheel_tag}"
+install.components = ["s2_py"]

@@ -3,5 +3,14 @@ build/
 dist/
 __pycache__/
 
-s2_py.egg-info/
+*.egg-info/
 venv/
+.venv/
+uv.lock
+
+# Build artifacts (SWIG/CMake outputs)
+*.so
+*.dylib
+*.cxx
+lib/s2_py/pywraps2.py
+lib/s2_py/_pywraps2*
