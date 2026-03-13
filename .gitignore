@@ -14,3 +14,4 @@ uv.lock
 *.cxx
 lib/s2_py/pywraps2.py
 lib/s2_py/_pywraps2*
+wheelhouse
