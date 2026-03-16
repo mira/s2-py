@@ -1,39 +1,18 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 project(s2_py)
 
-# Link s2 statically into _pywraps2.so so the wheel is self-contained
+# Link s2 statically into the wheel so it's self-contained
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Static libs must be PIC to link into a shared .so (required on aarch64)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Extension modules should use Development.Module (not Development/Embed)
-# to avoid linking libpython — symbols resolve at runtime via the interpreter.
-find_package(Python3 COMPONENTS Interpreter Development.Module)
-# Satisfy the submodule's find_package(Python3 ... Development) requirement
-set(Python3_FOUND TRUE)
-set(Python3_Development_FOUND TRUE)
-set(Python3_Development.Embed_FOUND TRUE)
-# Don't link libpython — not needed for extension modules
-if(NOT Python3_LIBRARIES)
-  set(Python3_LIBRARIES "")
-endif()
-
-# Prevent the s2geometry submodule from re-running find_package(Python3)
-macro(find_package pkg)
-  if("${pkg}" STREQUAL "Python3")
-    # no-op: already found
-  else()
-    _find_package(${ARGV})
-  endif()
-endmacro()
+# Disable tests (no googletest needed)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+# Enable Python bindings
+set(WITH_PYTHON ON CACHE BOOL "" FORCE)
 
 add_subdirectory(s2geometry)
 
-# Restore find_package
-macro(find_package)
-  _find_package(${ARGV})
-endmacro()
-
 # Install the SWIG extension and Python wrapper into the s2_py package
-install(TARGETS _pywraps2 DESTINATION s2_py COMPONENT s2_py)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/s2geometry/python/pywraps2.py" DESTINATION s2_py COMPONENT s2_py)
+install(TARGETS s2geometry DESTINATION s2_py COMPONENT s2_py)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/s2geometry/python/s2geometry.py"
+        DESTINATION s2_py COMPONENT s2_py)

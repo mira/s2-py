@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "s2-py"
-version = "0.11.1"
+version = "0.12.0"
 description = "pip-able S2 Geometry Bindings"
 readme = "README.md"
 license = "Apache-2.0"
@@ -20,45 +20,56 @@ wheel.packages = ["lib/s2_py"]
 cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}"
 install.components = ["s2_py"]
-cmake.args = ["-DCMAKE_CXX_FLAGS=-w", "-DOPENSSL_USE_STATIC_LIBS=TRUE"]
+cmake.args = [
+    "-DCMAKE_CXX_FLAGS=-w",
+    "-DCMAKE_CXX_STANDARD=17",
+]
 
 [tool.cibuildwheel]
-# build = "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
-build = "cp313-*"
+build = "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
+test-command = "python -c \"import s2_py as s2; ll = s2.S2LatLng.FromDegrees(40.7128, -74.0060); print('lat:', ll.lat().degrees(), 'lng:', ll.lng().degrees())\""
 
 [tool.cibuildwheel.linux]
-# archs = "x86_64 aarch64"
-archs = "x86_64"
+archs = "x86_64 aarch64"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
 before-all = [
     "yum install -y pcre-devel openssl-devel",
+    # Bison >= 3.5 (yum only has 3.0.4)
+    "curl -L https://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.gz | tar xz",
+    "(cd bison-3.8.2 && ./configure && make -j$(nproc) && make install)",
+    # Abseil 20240722
+    "curl -L https://github.com/abseil/abseil-cpp/archive/refs/tags/20240722.0.tar.gz | tar xz",
+    "(cd abseil-cpp-20240722.0 && mkdir build && cd build && cmake .. -DCMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/usr/local -DABSL_BUILD_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON && make -j$(nproc) && make install)",
+    # SWIG 4.2.1 (remove pre-installed 4.4+ which is incompatible)
     "rm -f /usr/local/bin/swig*",
-    "curl -L https://github.com/swig/swig/archive/refs/tags/v3.0.12.tar.gz | tar xz",
-    "(cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(nproc) && make install)",
-    "curl -L https://github.com/google/googletest/archive/refs/tags/release-1.8.1.tar.gz | tar xz",
-    "(cd googletest-release-1.8.1/googletest && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS='-Wno-error=maybe-uninitialized' && make -j$(nproc) && cp -r ../include/gtest /usr/include/gtest)",
+    "curl -L https://github.com/swig/swig/archive/refs/tags/v4.2.1.tar.gz | tar xz",
+    "(cd swig-4.2.1 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(nproc) && make install)",
 ]
 
 [[tool.cibuildwheel.overrides]]
 select = "*-musllinux_*"
 before-all = [
-    "apk add --no-cache pcre-dev openssl-dev cmake make gcc g++ autoconf automake libtool",
+    "apk add --no-cache pcre-dev openssl-dev cmake make gcc g++ autoconf automake libtool bison",
+    # Abseil 20240722
+    "curl -L https://github.com/abseil/abseil-cpp/archive/refs/tags/20240722.0.tar.gz | tar xz",
+    "(cd abseil-cpp-20240722.0 && mkdir build && cd build && cmake .. -DCMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/usr/local -DABSL_BUILD_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON && make -j$(nproc) && make install)",
+    # SWIG 4.2.1 (remove any pre-installed version)
     "rm -f /usr/local/bin/swig*",
-    "curl -L https://github.com/swig/swig/archive/refs/tags/v3.0.12.tar.gz | tar xz",
-    "(cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(nproc) && make install)",
-    "curl -L https://github.com/google/googletest/archive/refs/tags/release-1.8.1.tar.gz | tar xz",
-    "(cd googletest-release-1.8.1/googletest && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_FLAGS='-Wno-error=maybe-uninitialized' && make -j$(nproc) && cp -r ../include/gtest /usr/include/gtest)",
+    "curl -L https://github.com/swig/swig/archive/refs/tags/v4.2.1.tar.gz | tar xz",
+    "(cd swig-4.2.1 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(nproc) && make install)",
 ]
 
 [tool.cibuildwheel.macos]
 archs = "auto"
-environment = { MACOSX_DEPLOYMENT_TARGET = "14.0" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "14.0", CMAKE_ARGS = "-DOPENSSL_USE_STATIC_LIBS=TRUE" }
 before-all = [
-    "brew install pcre cmake automake openssl@3",
-    "curl -L https://github.com/swig/swig/archive/refs/tags/v3.0.12.tar.gz | tar xz",
-    "(cd swig-3.0.12 && ./autogen.sh && ./configure --without-alllang --with-python && make -j$(sysctl -n hw.ncpu) && sudo make install)",
-    "curl -L https://github.com/google/googletest/archive/refs/tags/release-1.8.1.tar.gz | tar xz",
-    "(cd googletest-release-1.8.1/googletest && mkdir build && cd build && cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && make -j$(sysctl -n hw.ncpu) && sudo mkdir -p /usr/local/include && sudo cp -r ../include/gtest /usr/local/include/gtest)",
+    "brew install pcre cmake automake openssl@3 bison",
+    # Abseil 20240722 (brew version is too new)
+    "curl -L https://github.com/abseil/abseil-cpp/archive/refs/tags/20240722.0.tar.gz | tar xz",
+    "(cd abseil-cpp-20240722.0 && mkdir build && cd build && cmake .. -DCMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/usr/local -DABSL_BUILD_TESTING=OFF && make -j$(sysctl -n hw.ncpu) && sudo make install)",
+    # SWIG 4.2.1 (brew swig 4.4+ is incompatible)
+    "curl -L https://github.com/swig/swig/archive/refs/tags/v4.2.1.tar.gz | tar xz",
+    "(cd swig-4.2.1 && BISON=$(brew --prefix bison)/bin/bison && PATH=\"$(dirname $BISON):$PATH\" ./autogen.sh && PATH=\"$(dirname $BISON):$PATH\" ./configure --without-alllang --with-python && PATH=\"$(dirname $BISON):$PATH\" make -j$(sysctl -n hw.ncpu) && sudo make install)",
 ]

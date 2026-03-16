@@ -14,4 +14,8 @@ uv.lock
 *.cxx
 lib/s2_py/pywraps2.py
 lib/s2_py/_pywraps2*
+lib/s2_py/s2geometry.py
+lib/s2_py/_s2geometry*
+
 wheelhouse
+deps

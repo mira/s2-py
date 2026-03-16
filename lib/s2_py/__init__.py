@@ -1,1 +1,1 @@
-from .pywraps2 import *
+from .s2geometry import *
