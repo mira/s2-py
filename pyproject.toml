@@ -30,7 +30,7 @@ build = "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
 test-command = "python -c \"import s2_py as s2; ll = s2.S2LatLng.FromDegrees(40.7128, -74.0060); print('lat:', ll.lat().degrees(), 'lng:', ll.lng().degrees())\""
 
 [tool.cibuildwheel.linux]
-archs = "x86_64 aarch64"
+archs = "auto"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_*"
